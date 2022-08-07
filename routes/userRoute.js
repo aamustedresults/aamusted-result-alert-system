@@ -45,6 +45,16 @@ router.post(
       return res.status(404).json("Invalid password!");
     }
 
+    console.log(user[0]);
+    if (user[0].active === false) {
+      console.log("disabled");
+      return res
+        .status(404)
+        .json(
+          "Your account has been disabled? Try contacting your administrator."
+        );
+    }
+
     let loggedInUser;
     if (user[0].role === "student") {
       const student = await Student.find({ indexNumber: user[0].username });
@@ -88,11 +98,8 @@ router.post(
 router.put(
   "/",
   AsyncHandler(async (req, res) => {
-
-    
     const newUser = req.body;
-    // console.log(newUser)
-const reservedPassword=req.body.password
+    const reservedPassword = req.body.password;
 
     const hashedPassword = await bcrypt.hash(newUser.password, 10);
     newUser.password = hashedPassword;
@@ -110,9 +117,63 @@ Your username is <b style='text-decoration:underline;'> ${user.username}</b>, an
 <p>Thank You !!!</p>
 </div>`;
 
-    sendMail(htmlText);
+    // sendMail(htmlText);
     // res.json(user);
     res.json("hello");
+  })
+);
+
+//@PUT Reset Password
+router.put(
+  "/reset",
+  AsyncHandler(async (req, res) => {
+    const { id, oldPassword, newPassword } = req.body;
+    const user = await User.findById(id);
+
+    if (_.isEmpty(user)) {
+      return res.status(404).json("User does not exist");
+    }
+    const isTrue = await bcrypt.compare(oldPassword, user.password);
+    if (!isTrue) {
+      return res.status(404).json("Password is incorrect!!!");
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedUser = await User.findByIdAndUpdate(id, {
+      password: hashedPassword,
+    });
+
+    if (_.isEmpty(updatedUser)) {
+      return res.status(404).json("Error updating user info.Try Again Later.");
+    }
+
+    res.json("User information updated !!!");
+  })
+);
+
+router.put(
+  "/account",
+  AsyncHandler(async (req, res) => {
+    const { id, active } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { active },
+      {
+        new: true,
+      }
+    );
+
+    if (_.isEmpty(updatedUser)) {
+      return res.status(404).json("Error updating user info");
+    }
+    // console.log(updatedUser);
+
+    res.json(
+      updatedUser.active === true
+        ? "User account enabled"
+        : "User account disabled"
+    );
   })
 );
 

@@ -6,6 +6,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
+const db = require("./db/DBConnection");
 const studentRoute = require("./routes/studentRoute");
 const departmentRoute = require("./routes/departmentRoute");
 const programmeRoute = require("./routes/programmeRoute");
@@ -13,7 +14,6 @@ const courseRoute = require("./routes/courseRoute");
 const resultRoute = require("./routes/resultRoute");
 const userRoute = require("./routes/userRoute");
 const registeredCoursesRoute = require("./routes/registeredCoursesRoute");
-const db = require("./db/DBConnection");
 
 //initialize express
 const app = express();
@@ -22,6 +22,7 @@ const app = express();
 const port = 8000;
 
 //static path
+app.use(express.static(path.join(__dirname, "build")));
 app.use(express.static(path.resolve("images", __dirname)));
 //middlewares
 app.use(cookieParser());
@@ -35,8 +36,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie:{secure:false}
-
+    cookie: { secure: false },
   })
 );
 
@@ -49,11 +49,15 @@ app.use("/course", courseRoute);
 app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
 
-app.get("/", (req, res) => res.send("Hello World!"));
+// app.get("/", (req, res) => res.send("Hello World!"));
+// app.get('/*', function (req, res) {
+//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// });
 
 db.asPromise()
   .then(() => {
-    console.log("DB CONNECTED");
     app.listen(port, () => console.log(`listening on port ${port}!`));
   })
-  .catch((error) => console.log(error));
+  .catch((error) => {
+    throw error;
+  });

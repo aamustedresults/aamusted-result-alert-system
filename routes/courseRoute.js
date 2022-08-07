@@ -2,12 +2,16 @@ const router = require("express").Router();
 const AsyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+const apiCache=require('apicache')
 
 const Course = require("../models/courseModel");
+
+const cache=apiCache.middleware;
 
 //@GET courses
 router.get(
   "/",
+  cache("5 minutes"),
   AsyncHandler(async (req, res) => {
     const programme = req.query.programme;
     if (programme) {

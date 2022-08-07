@@ -38,13 +38,26 @@ const sendMail = async (htmlText) => {
 
     const mailOptions = {
       from: "nicktest701@gmail.com",
-      to: ["phreshboune17@gmail.com", "kwasiowusuansah00@gmail.com"],
+      to: ["phreshboune17@gmail.com"],
+      // to: ["phreshboune17@gmail.com", "kwasiowusuansah00@gmail.com"],
       subject: "Message from results system",
       text: "Message from results system",
       html: `<!DOCTYPE html>
-      <html>
-      <head></head>
-      <body>
+      <html lang="en">
+      <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+      <style>
+
+      html{
+        font-family:'Open Sans',sans-serif !important;
+        font-size:15px;
+      }
+      </style>
+  </head>
+      <body style='font-family:"Open Sans",sans-serif;background-color:whitesmoke;padding:20px;color:#333;'>
       ${htmlText}
       </body>
       </html>

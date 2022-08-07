@@ -1,11 +1,25 @@
 const router = require("express").Router();
 const AsyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
+const multer = require("multer");
 const _ = require("lodash");
 const sendMail = require("../config/mail");
-
 const Result = require("../models/resultModel");
 const Student = require("../models/studentModel");
+
+
+const { jsPDF } = require("jspdf"); // will automatically load the node version
+
+const Storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./results");
+  },
+  filename: function (req, file, cb) {
+    const ext = file?.originalname?.split(".")[1];
+    cb(null, `${req.body.indexNumber}.${ext}`);
+  },
+});
+const upload = multer({ storage: Storage });
 
 //@GET result by id
 router.get(
@@ -45,9 +59,11 @@ router.post(
       // );
       // console.log(newResults);
 
-      const newResults=_.merge(_.keyBy( isExist[0].results,"course.id"),_.keyBy(newResult.results,"course.id"));
+      const newResults = _.merge(
+        _.keyBy(isExist[0].results, "course.id"),
+        _.keyBy(newResult.results, "course.id")
+      );
 
-    
       result = await Result.findByIdAndUpdate(
         id,
         {
@@ -60,15 +76,12 @@ router.post(
           new: true,
         }
       );
-  
-      return res.status(201).json(result);
 
-   
+      return res.status(201).json(result);
     }
 
     result = await Result.create(newResult);
     res.json(result);
-
   })
 );
 
@@ -105,5 +118,58 @@ router.post(
     }
   })
 );
+
+router.post(
+  "/publishAll",
+  AsyncHandler(async (req, res) => {
+    const indexNumbers = req.body.indexNumber;
+
+    const students = indexNumbers.map(async (indexNumber) => {
+      const student = await Student.find({ indexNumber });
+      const result = await Result.find({ indexNumber });
+
+      return {
+        student: student[0],
+        result: result === undefined ? [] : result,
+      };
+    });
+
+    Promise.all(students).then((student) => {
+      res.json(student);
+    });
+  })
+);
+
+
+
+router.post(
+  "/send",
+  AsyncHandler(async (req, res) => {
+    const emailInfoList = req.body;
+
+const response=emailInfoList.map(emailInfo=>{
+  sendMail(emailInfo.htmlText)
+})
+
+Promise.all(response).then(()=>{
+
+  res.json("Success")
+})
+  
+
+  })
+);
+
+router.post(
+  "/generate",
+  upload.array("result", 10),
+  AsyncHandler(async (req, res) => {
+    const indexNumbers = req.body.indexNumber;
+
+    console.log(req.body);
+    console.log(req.files);
+  })
+);
+
 
 module.exports = router;

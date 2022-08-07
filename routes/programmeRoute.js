@@ -2,12 +2,15 @@ const router = require("express").Router();
 const AsyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+const apiCache = require("apicache");
 
 const Programme = require("../models/programmeModel");
 
+const cache = apiCache.middleware;
 //@GET programmes
 router.get(
   "/",
+  cache("5 minutes"),
   AsyncHandler(async (req, res) => {
     const programmes = await Programme.find({});
     res.json(programmes);
@@ -18,16 +21,16 @@ router.get(
   "/:id",
   AsyncHandler(async (req, res) => {
     const id = req.params.id;
-    console.log(id)
-  
-      if (!mongoose.isValidObjectId(id)) {
-        return res.json({
-          error: true,
-          message: "Invalid programme id",
-        });
-      }
-  const  programme = await Programme.findById(id);
-   
+    console.log(id);
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.json({
+        error: true,
+        message: "Invalid programme id",
+      });
+    }
+    const programme = await Programme.findById(id);
+
     if (_.isEmpty(programme)) {
       return res.json({
         error: true,
@@ -85,7 +88,7 @@ router.delete(
     }
     console.log(id);
     const programme = await Programme.findByIdAndRemove(id);
-    if (programme ===null) {
+    if (programme === null) {
       return res.json({
         error: true,
         mesaage: "No programme with such id",

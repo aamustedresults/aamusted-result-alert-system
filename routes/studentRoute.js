@@ -55,7 +55,7 @@ router.post(
     newStudent.profile = req.file?.filename;
 
     const student = await Student.create(newStudent);
-console.log(student)
+
     if (student) {
       const hashedPassword = await bcrypt.hash(student.indexNumber, 10);
       const user = await User.create({
@@ -154,7 +154,7 @@ router.delete(
         message: "Invalid Student id",
       });
     }
-    console.log(id);
+
     const student = await Student.findByIdAndRemove(id);
     if (student === null) {
       return res.json({
