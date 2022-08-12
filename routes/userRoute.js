@@ -8,6 +8,7 @@ const sendMail = require("../config/mail");
 
 const User = require("../models/userModel");
 const Student = require("../models/studentModel");
+const Lecturer = require("../models/lecturerModel");
 
 //@PGET all users
 router.get(
@@ -71,6 +72,24 @@ router.post(
         programme: student[0].programme,
         role: user[0].role,
         profile: student[0].profile,
+        active: user[0].active,
+      };
+    } else if (user[0].role === "lecturer") {
+      const lecturer = await Lecturer.find({
+        professionalID: user[0].username,
+      });
+
+      if (!lecturer) {
+        return res
+          .status(404)
+          .json("Unable to verify account with this username");
+      }
+      loggedInUser = {
+        id: lecturer[0]._id,
+        username: lecturer[0].fullname,
+        professionalID: lecturer[0].professionalID,
+        role: user[0].role,
+        profile: lecturer[0].profile,
         active: user[0].active,
       };
     } else {

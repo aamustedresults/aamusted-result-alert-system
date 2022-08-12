@@ -9,11 +9,13 @@ const session = require("express-session");
 const db = require("./db/DBConnection");
 const studentRoute = require("./routes/studentRoute");
 const departmentRoute = require("./routes/departmentRoute");
+const lecturerRoute = require("./routes/lecturerRoute");
 const programmeRoute = require("./routes/programmeRoute");
 const courseRoute = require("./routes/courseRoute");
 const resultRoute = require("./routes/resultRoute");
 const userRoute = require("./routes/userRoute");
 const registeredCoursesRoute = require("./routes/registeredCoursesRoute");
+const assignedCourseRoute = require("./routes/assignedCourseRoute");
 
 //initialize express
 const app = express();
@@ -42,12 +44,14 @@ app.use(
 
 //routes
 app.use("/user", userRoute);
-app.use("/student", studentRoute);
 app.use("/department", departmentRoute);
+app.use("/lecturer", lecturerRoute);
+app.use("/student", studentRoute);
 app.use("/programme", programmeRoute);
 app.use("/course", courseRoute);
 app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
+app.use("/assigned_course", assignedCourseRoute);
 
 // app.get("/", (req, res) => res.send("Hello World!"));
 // app.get('/*', function (req, res) {
@@ -59,5 +63,7 @@ db.asPromise()
     app.listen(port, () => console.log(`listening on port ${port}!`));
   })
   .catch((error) => {
-    throw error;
+    console.log(error.reason.servers
+      );
+    // throw error;
   });

@@ -2,40 +2,31 @@ const router = require("express").Router();
 const AsyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-const apiCache=require('apicache')
+const apiCache = require("apicache");
 
-const Course = require("../models/courseModel");
+const AssignedCourse = require("../models/assignedCourseModel");
 
-const cache=apiCache.middleware;
+const cache = apiCache.middleware;
 
 //@GET courses
 router.get(
   "/",
   cache("5 minutes"),
   AsyncHandler(async (req, res) => {
-    const programme = req.query.programme;
-    if (programme) {
-      const courses = await Course.find({ programme });
-      return res.json(courses);
-    }
-    const courses = await Course.find({});
+    const courses = await AssignedCourse.find();
+
     res.json(courses);
   })
 );
+
 //@GET course by id
 router.get(
   "/:id",
+  cache("5 minutes"),
   AsyncHandler(async (req, res) => {
-    const id = req.params.id;
+    const professionalID = req.params.id;
 
-
-    if (!mongoose.isValidObjectId(id)) {
-      return res.json({
-        error: true,
-        message: "Invalid course id",
-      });
-    }
-    const course = await Course.findById(id);
+    const course = await AssignedCourse.find({ professionalID });
 
     if (_.isEmpty(course)) {
       return res.json({
@@ -51,7 +42,7 @@ router.post(
   "/",
   AsyncHandler(async (req, res) => {
     const newCourse = req.body;
-    const course = await Course.create(newCourse);
+    const course = await AssignedCourse.create(newCourse);
     res.json(course);
   })
 );
@@ -69,10 +60,14 @@ router.put(
     }
 
     const modifiedCourse = req.body;
-    const updatedCourse = await Course.findByIdAndUpdate(id, modifiedCourse, {
-      upsert: true,
-      new: true,
-    });
+    const updatedCourse = await AssignedCourse.findByIdAndUpdate(
+      id,
+      modifiedCourse,
+      {
+        upsert: true,
+        new: true,
+      }
+    );
     res.json(updatedCourse);
   })
 );
@@ -89,7 +84,7 @@ router.delete(
       });
     }
 
-    const course = await Course.findByIdAndRemove(id);
+    const course = await AssignedCourse.findByIdAndRemove(id);
     if (course === null) {
       return res.json({
         error: true,
