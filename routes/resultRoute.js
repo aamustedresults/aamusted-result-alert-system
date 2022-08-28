@@ -7,7 +7,6 @@ const sendMail = require("../config/mail");
 const Result = require("../models/resultModel");
 const Student = require("../models/studentModel");
 
-
 const { jsPDF } = require("jspdf"); // will automatically load the node version
 
 const Storage = multer.diskStorage({
@@ -113,7 +112,7 @@ router.post(
     if (!_.isEmpty(student)) {
       const result = await Result.find({ indexNumber });
 
-      sendMail(req.body.html);
+      sendMail(req.body.html, student[0].email);
       res.json("Data sent");
     }
   })
@@ -140,23 +139,18 @@ router.post(
   })
 );
 
-
-
 router.post(
   "/send",
   AsyncHandler(async (req, res) => {
     const emailInfoList = req.body;
 
-const response=emailInfoList.map(emailInfo=>{
-  sendMail(emailInfo.htmlText)
-})
+    const response = emailInfoList.map((emailInfo) => {
+      sendMail(emailInfo.htmlText, emailInfo.email);
+    });
 
-Promise.all(response).then(()=>{
-
-  res.json("Success")
-})
-  
-
+    Promise.all(response).then(() => {
+      res.json(response);
+    });
   })
 );
 
@@ -170,6 +164,5 @@ router.post(
     console.log(req.files);
   })
 );
-
 
 module.exports = router;

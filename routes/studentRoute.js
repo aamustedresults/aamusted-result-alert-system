@@ -6,7 +6,9 @@ const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const Student = require("../models/studentModel");
 const User = require("../models/userModel");
-const sendMail=require('../config/mail')
+const sendMail = require("../config/mail");
+const messenger = require("../config/messenger");
+const sendSMS = require("../config/sms");
 
 const Storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -23,9 +25,48 @@ const upload = multer({ storage: Storage });
 router.get(
   "/",
   AsyncHandler(async (req, res) => {
-    const department = req.query.department || "";
-    const programme = req.query.programme || "";
-    const level = req.query.level || "";
+    const department = req.query.department;
+    const programme = req.query.programme;
+    const level = req.query.level;
+
+    if (department && programme && level) {
+      const students = await Student.find({ department, programme, level });
+      res.json(students);
+      return;
+    }
+    if (department && programme) {
+      const students = await Student.find({ department, programme });
+      res.json(students);
+      return;
+    }
+    if (department && level) {
+      const students = await Student.find({ department, level });
+      res.json(students);
+      return;
+    }
+    if (programme && level) {
+      const students = await Student.find({ programme, level });
+      res.json(students);
+      return;
+    }
+
+    if (department) {
+      const students = await Student.find({ department });
+      res.json(students);
+      return;
+    }
+
+    if (programme) {
+      const students = await Student.find({ programme });
+      res.json(students);
+      return;
+    }
+
+    if (level) {
+      const students = await Student.find({ level });
+      res.json(students);
+      return;
+    }
 
     const students = await Student.find({});
     res.json(students);
@@ -65,23 +106,24 @@ router.post(
         role: "student",
       });
 
-
-      if(user){
+      if (user) {
         const htmlText = `<div>
-        <h2 style='color:#5aa7a7;text-decoration:underline;'>RESULTS SYSTEM</h2>
+        <h2 style='color:#5aa7a7;text-decoration:underline;'>AAMUSTED</h2>
         <p>Dear ${student.fullname}, 
         <p>You have been enrolled successfully on the results system.
         Your username is <b style='text-decoration:underline;'> ${student.indexNumber}</b>, and  your default password is <b style='text-decoration:underline;'>${student.indexNumber}</b>.</p>
         <p> You can log on into the <i style='color:#5aa7a7;text-decoration:underline;'> setting page </i> of the system to change your password.</p>
         <p>Thank You !!!</p>
         </div>`;
-        
-            sendMail(htmlText);
-      }
-  
 
+        sendMail(htmlText, student.email);
+        // messenger(student.telephoneNo);
+        // const data = await sendSMS(
+        //   "You have been enrolled successfully on the results system."
+        // );
+        // console.log(data);
+      }
     }
- 
 
     res.json(student);
   })
@@ -147,7 +189,7 @@ router.delete(
   "/",
   AsyncHandler(async (req, res) => {
     const id = req.query.id;
-    
+
     if (!mongoose.isValidObjectId(id)) {
       return res.json({
         error: true,

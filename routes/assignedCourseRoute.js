@@ -11,22 +11,29 @@ const cache = apiCache.middleware;
 //@GET courses
 router.get(
   "/",
-  cache("5 minutes"),
   AsyncHandler(async (req, res) => {
     const courses = await AssignedCourse.find();
-
     res.json(courses);
   })
 );
 
 //@GET course by id
 router.get(
-  "/:id",
-  cache("5 minutes"),
+  "/:lecturerID",
   AsyncHandler(async (req, res) => {
-    const professionalID = req.params.id;
-
+    const professionalID = req.params.lecturerID;
     const course = await AssignedCourse.find({ professionalID });
+    res.json(course);
+  })
+);
+
+//@GET course by id
+router.get(
+  "/all/:programme",
+  AsyncHandler(async (req, res) => {
+    const programme = req.params.programme;
+
+    const course = await AssignedCourse.find({ programme });
 
     if (_.isEmpty(course)) {
       return res.json({
@@ -37,6 +44,7 @@ router.get(
     res.json(course);
   })
 );
+
 //@POST courses
 router.post(
   "/",

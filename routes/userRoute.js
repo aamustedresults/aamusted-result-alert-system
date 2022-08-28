@@ -14,7 +14,8 @@ const Lecturer = require("../models/lecturerModel");
 router.get(
   "/",
   AsyncHandler(async (req, res) => {
-    const users = await User.find();
+    const users = await User.find({ role: { $nin: ["student", "lecturer"] } });
+    // console.log(users);
     if (!users) {
       return res.status(404).json("Error fetching information");
     }
@@ -46,9 +47,8 @@ router.post(
       return res.status(404).json("Invalid password!");
     }
 
-    console.log(user[0]);
+    // console.log(user[0]);
     if (user[0].active === false) {
-      console.log("disabled");
       return res
         .status(404)
         .json(
@@ -79,11 +79,12 @@ router.post(
         professionalID: user[0].username,
       });
 
-      if (!lecturer) {
+      if (lecturer.length === 0) {
         return res
           .status(404)
           .json("Unable to verify account with this username");
       }
+      console.log(lecturer);
       loggedInUser = {
         id: lecturer[0]._id,
         username: lecturer[0].fullname,

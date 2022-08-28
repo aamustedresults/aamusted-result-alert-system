@@ -66,7 +66,7 @@ router.post(
 
       if (user) {
         const htmlText = `<div>
-        <h2 style='color:#5aa7a7;text-decoration:underline;'>RESULTS SYSTEM</h2>
+        <h2 style='color:#5aa7a7;text-decoration:underline;'>AAMUSTED</h2>
         <p>Dear ${lecturer.fullname}, 
         <p>You have been enrolled successfully on the results system.
         Your username is <b style='text-decoration:underline;'> ${lecturer.professionalID}</b>, and  your default password is <b style='text-decoration:underline;'>${lecturer.professionalID}</b>.</p>
@@ -74,7 +74,7 @@ router.post(
         <p>Thank You !!!</p>
         </div>`;
 
-        sendMail(htmlText);
+        sendMail(htmlText,lecturer.email);
       }
     }
 
@@ -86,7 +86,7 @@ router.post(
 router.put(
   "/",
   AsyncHandler(async (req, res) => {
-    const id = req.body._id;
+    const id = req.body.id;
 
     if (!mongoose.isValidObjectId(id)) {
       return res.json({

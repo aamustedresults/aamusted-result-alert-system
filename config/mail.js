@@ -1,23 +1,17 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 
-const CLIENT_ID =
-  "875564393300-hb6hgvng1vkt937s1jmv7dbebqjmk8l5.apps.googleusercontent.com";
-const CLIENT_SECRET = "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";
-const REDIRECT_URL = "hhtps://developers.google.com/oauthplayground";
-const REFRESH_TOKEN =
-  "1//04qm8gkJhayqsCgYIARAAGAQSNwF-L9IrOILTK46y0skCWd-7ZAiAtDD8usa9W1cilkA86XVilUF11GD4Whk99hhrD42iHsMniIA";
-
 const client = new google.auth.OAuth2({
-  clientId: CLIENT_ID,
-  clientSecret: CLIENT_SECRET,
-  redirectUri: REDIRECT_URL,
-});
-client.setCredentials({
-  refresh_token: REFRESH_TOKEN,
+  clientId: process.env.MAIL_CLIENT_ID,
+  clientSecret: process.env.MAIL_CLIENT_SECRET,
+  redirectUri: process.env.MAIL_REDIRECT_URL,
 });
 
-const sendMail = async (htmlText) => {
+client.setCredentials({
+  refresh_token: process.env.MAIL_REFRESH_TOKEN,
+});
+
+const sendMail = async (htmlText, email) => {
   try {
     const ACCESS_TOKEN = await client.getAccessToken();
 
@@ -25,10 +19,10 @@ const sendMail = async (htmlText) => {
       service: "gmail",
       auth: {
         type: "OAUTH2",
-        user: "nicktest701@gmail.com",
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        refreshToken: REFRESH_TOKEN,
+        user: "aamustedresults@gmail.com",
+        clientId: process.env.MAIL_CLIENT_ID,
+        clientSecret:process.env.MAIL_CLIENT_SECRET,
+        refreshToken:process.env.MAIL_REFRESH_TOKEN,
         accessToken: ACCESS_TOKEN,
       },
       tls: {
@@ -37,11 +31,10 @@ const sendMail = async (htmlText) => {
     });
 
     const mailOptions = {
-      from: "nicktest701@gmail.com",
-      to: ["phreshboune17@gmail.com"],
-      // to: ["phreshboune17@gmail.com", "kwasiowusuansah00@gmail.com"],
-      subject: "Message from results system",
-      text: "Message from results system",
+      from: "aamustedresults@gmail.com",
+      to: [email],
+      subject: "AAMUSTED",
+      text: "AAMUSTED",
       html: `<!DOCTYPE html>
       <html lang="en">
       <head>
@@ -69,7 +62,7 @@ const sendMail = async (htmlText) => {
     const mailResult = await transportMail.sendMail(mailOptions);
     console.log(mailResult);
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
   }
 };
 
