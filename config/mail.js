@@ -47,7 +47,7 @@ const sendMail = async (htmlText, email) => {
       html{
         font-family:'Open Sans',sans-serif !important;
         font-size:15px;
-      }
+      } 
       </style>
   </head>
       <body style='font-family:"Open Sans",sans-serif;background-color:whitesmoke;padding:20px;color:#333;'>

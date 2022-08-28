@@ -53,10 +53,10 @@ app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
 app.use("/assigned_course", assignedCourseRoute);
 
-// app.get("/", (req, res) => res.send("Hello World!"));
-// app.get('/*', function (req, res) {
-//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
-// });
+
+app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 db.asPromise()
   .then(() => {
