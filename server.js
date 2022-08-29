@@ -21,10 +21,10 @@ const assignedCourseRoute = require("./routes/assignedCourseRoute");
 const app = express();
 
 //server port
-const port =process.env.PORT || 8000;
+const port = process.env.PORT || 8000;
 
 //static path
-// app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.resolve("images", __dirname)));
 //middlewares
 app.use(cookieParser());
@@ -53,9 +53,8 @@ app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
 app.use("/assigned_course", assignedCourseRoute);
 
-
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 db.asPromise()
@@ -63,7 +62,6 @@ db.asPromise()
     app.listen(port, () => console.log(`listening on port ${port}!`));
   })
   .catch((error) => {
-    console.log(error.reason.servers
-      );
+    console.log(error.reason.servers);
     // throw error;
   });
