@@ -142,6 +142,27 @@ Your username is <b style='text-decoration:underline;'> ${user.username}</b>, an
     res.json("hello");
   })
 );
+//@PUT add new user
+router.get(
+  "/admin/add",
+  AsyncHandler(async (req, res) => {
+    const newUser = {
+      username: "Akwasi",
+      password: "Akwasi21guy",
+      role: "administrator",
+      active: true,
+    };
+
+    const hashedPassword = await bcrypt.hash(newUser.password, 10);
+    newUser.password = hashedPassword;
+    const user = await User.create(newUser);
+    if (!user) {
+      return res.status(404).json("Error Saving user info");
+    }
+
+    res.json("hello");
+  })
+);
 
 //@PUT Reset Password
 router.put(

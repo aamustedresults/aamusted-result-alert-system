@@ -24,7 +24,7 @@ const app = express();
 const port =process.env.PORT || 8000;
 
 //static path
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.resolve("images", __dirname)));
 //middlewares
 app.use(cookieParser());
@@ -54,9 +54,9 @@ app.use("/registered", registeredCoursesRoute);
 app.use("/assigned_course", assignedCourseRoute);
 
 
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// app.get('/', function (req, res) {
+//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// });
 
 db.asPromise()
   .then(() => {
