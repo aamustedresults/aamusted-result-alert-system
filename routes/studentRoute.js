@@ -7,7 +7,7 @@ const multer = require("multer");
 const Student = require("../models/studentModel");
 const User = require("../models/userModel");
 const sendMail = require("../config/mail");
-const messenger = require("../config/messenger");
+
 const sendSMS = require("../config/sms");
 
 const Storage = multer.diskStorage({
@@ -117,7 +117,6 @@ router.post(
         </div>`;
 
         sendMail(htmlText, student.email);
-        // messenger(student.telephoneNo);
         // const data = await sendSMS(
         //   "You have been enrolled successfully on the results system."
         // );
