@@ -45,7 +45,6 @@ app.use(
   })
 );
 
-
 //routes
 app.use("/user", userRoute);
 app.use("/department", departmentRoute);

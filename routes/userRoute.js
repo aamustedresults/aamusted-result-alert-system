@@ -15,7 +15,7 @@ router.get(
   "/",
   AsyncHandler(async (req, res) => {
     const users = await User.find({ role: { $nin: ["student", "lecturer"] } });
-    // console.log(users);
+
     if (!users) {
       return res.status(404).json("Error fetching information");
     }
@@ -47,7 +47,6 @@ router.post(
       return res.status(404).json("Invalid password!");
     }
 
-    // console.log(user[0]);
     if (user[0].active === false) {
       return res
         .status(404)
@@ -84,7 +83,7 @@ router.post(
           .status(404)
           .json("Unable to verify account with this username");
       }
-      console.log(lecturer);
+
       loggedInUser = {
         id: lecturer[0]._id,
         username: lecturer[0].fullname,
@@ -208,7 +207,6 @@ router.put(
     if (_.isEmpty(updatedUser)) {
       return res.status(404).json("Error updating user info");
     }
-    // console.log(updatedUser);
 
     res.json(
       updatedUser.active === true
