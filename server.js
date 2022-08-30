@@ -24,7 +24,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 //static path
-// app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.resolve("images", __dirname)));
 //middlewares
 app.use(cookieParser());
@@ -32,7 +32,10 @@ app.use(cookieParser());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(logger("dev"));
+
+if (process.env.NODE_ENV !== "productuction") {
+  app.use(logger("dev"));
+}
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -56,9 +59,9 @@ app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
 app.use("/assigned_course", assignedCourseRoute);
 
-// app.get("/*", function (req, res) {
-//   res.sendFile(path.join(__dirname, "public", "index.html"));
-// });
+app.get("/*", function (req, res) {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 db.asPromise()
   .then(() => {
