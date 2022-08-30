@@ -44,9 +44,7 @@ app.use(
     cookie: { secure: false },
   })
 );
-if (process.env.NODE_ENV !== "production") {
-  console.log("not production");
-}
+
 
 //routes
 app.use("/user", userRoute);
