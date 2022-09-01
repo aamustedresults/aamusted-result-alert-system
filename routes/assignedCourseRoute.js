@@ -33,13 +33,15 @@ router.get(
   AsyncHandler(async (req, res) => {
     const programme = req.params.programme;
 
+    console.log(programme);
     const course = await AssignedCourse.find({ programme });
 
     if (_.isEmpty(course)) {
-      return res.json({
-        error: true,
-        message: "No Such course exits",
-      });
+      return res
+        .status(404)
+        .json(
+          "No lecturer has been assigned under this programme!"
+        );
     }
     res.json(course);
   })

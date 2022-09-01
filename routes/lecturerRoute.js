@@ -7,6 +7,7 @@ const multer = require("multer");
 const Lecturer = require("../models/lecturerModel");
 const User = require("../models/userModel");
 const sendMail = require("../config/mail");
+const sendSMS = require("../config/sms");
 
 const Storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -65,16 +66,25 @@ router.post(
       });
 
       if (user) {
+        const settingsUrl =
+          "https://aamusted-results.herokuapp.com/info/settings";
         const htmlText = `<div>
         <h2 style='color:#5aa7a7;text-decoration:underline;'>AAMUSTED</h2>
         <p>Dear ${lecturer.fullname}, 
         <p>You have been enrolled successfully on the results system.
         Your username is <b style='text-decoration:underline;'> ${lecturer.professionalID}</b>, and  your default password is <b style='text-decoration:underline;'>${lecturer.professionalID}</b>.</p>
-        <p> You can log on into the <i style='color:#5aa7a7;text-decoration:underline;'> setting page </i> of the system to change your password.</p>
+         <p> You can log onto the <a href=${settingsUrl}> setting page </a> of the system to change your password.</p>
         <p>Thank You !!!</p>
         </div>`;
 
-        sendMail(htmlText,lecturer.email);
+        sendMail(htmlText, lecturer.email);
+        const smsMessage = `Dear ${lecturer.fullname},
+You have been enrolled successfully on the results system.
+Your username is ${lecturer.professionalID}  and  your default password is ${lecturer.professionalID}.
+You can log onto the setting page of the system to change your password.
+Thank you!!!
+`;
+        await sendSMS(smsMessage, lecturer.telephoneNo);
       }
     }
 

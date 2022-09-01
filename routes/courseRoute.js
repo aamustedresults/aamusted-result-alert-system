@@ -2,11 +2,11 @@ const router = require("express").Router();
 const AsyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-const apiCache=require('apicache')
+const apiCache = require("apicache");
 
 const Course = require("../models/courseModel");
 
-const cache=apiCache.middleware;
+const cache = apiCache.middleware;
 
 //@GET courses
 router.get(
@@ -27,7 +27,6 @@ router.get(
   "/:id",
   AsyncHandler(async (req, res) => {
     const id = req.params.id;
-
 
     if (!mongoose.isValidObjectId(id)) {
       return res.json({
@@ -52,6 +51,7 @@ router.post(
   AsyncHandler(async (req, res) => {
     const newCourse = req.body;
     const course = await Course.create(newCourse);
+    //course);
     res.json(course);
   })
 );
@@ -73,6 +73,7 @@ router.put(
       upsert: true,
       new: true,
     });
+    //updatedCourse);
     res.json(updatedCourse);
   })
 );

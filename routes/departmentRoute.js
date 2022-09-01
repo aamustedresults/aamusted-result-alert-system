@@ -18,7 +18,7 @@ router.get(
   "/:id",
   AsyncHandler(async (req, res) => {
     const id = req.params.id;
-    console.log(id)
+    //id)
   
       if (!mongoose.isValidObjectId(id)) {
         return res.json({
@@ -52,7 +52,7 @@ router.put(
   "/",
   AsyncHandler(async (req, res) => {
     const id = req.body.id;
-    console.log(req.body)
+    //req.body)
     if (!mongoose.isValidObjectId(id)) {
       return res.json({
         error: true,
@@ -84,7 +84,7 @@ router.delete(
         message: "Invalid department id",
       });
     }
-    console.log(id);
+    //id);
     const department = await Department.findByIdAndRemove(id);
     if (department ===null) {
       return res.json({

@@ -1,27 +1,27 @@
 const axios = require("axios");
 
-const sendSMS = async (message) => {
+const sendSMS = async (message, telephoneNumber) => {
   try {
     // SEND SMS
 
     const data = {
       sender: "AAMUSTED",
       message: message,
-      recipients: ["+233543772591"],
+      recipients: [telephoneNumber],
     };
 
     const res = await axios({
       method: "POST",
-      url: "https://sms.arkesel.com/api/v2/sms/send",
+      url: process.env.SMS_URL,
       headers: {
-        "api-key": "WmhLR21GSURXd0twZW10VXlMRFA",
+        "api-key": process.env.SMS_API_KEY,
       },
       data: data,
     });
 
     return res.data;
   } catch (error) {
-    console.log(error.message);
+    //error.message);
   }
 };
 

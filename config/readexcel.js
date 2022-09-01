@@ -27,7 +27,7 @@ function App() {
         backgroundColor: "pink",
         overflowY: "scroll",
       });
-      console.log(dataParse);
+      //dataParse);
     };
     reader.readAsBinaryString(files);
   };

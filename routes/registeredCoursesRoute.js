@@ -93,7 +93,7 @@ router.post(
   AsyncHandler(async (req, res) => {
     let course;
     const newCourse = req.body;
-    // console.log(newCourse);
+    // //newCourse);
 
     const isExist = await Register.find({
       indexNumber: newCourse.indexNumber,
@@ -142,7 +142,7 @@ router.post(
           course: newCourse.courses[0].course.label,
           professionalID: newCourse.courses[0].course.professionalID,
         });
-        console.log(lec);
+        //lec);
       }
     }
 
@@ -167,7 +167,7 @@ router.post(
       .equals(level)
       .select("indexNumber")
       .exec();
-    // console.log(students);
+    // //students);
     const addStudentIndexNumber = students.map(async ({ indexNumber }) => {
       return await registerMe(newCourse, indexNumber);
     });
@@ -186,10 +186,10 @@ router.post(
         .equals(Number(newCourse.semester))
         .exec();
 
-      console.log(isExist);
-      console.log("-------------------------------------------");
+      //isExist);
+      //"-------------------------------------------");
       if (isExist.length !== 0) {
-        console.log("exitst");
+        //"exitst");
         const id = isExist[0]._id;
 
         const newCourses = _.merge(
@@ -231,7 +231,7 @@ router.post(
             course: newCourse.courses[0].course.label,
             professionalID: newCourse.courses[0].course.professionalID,
           });
-          // console.log(lec);
+          // //lec);
         }
       }
       return course;

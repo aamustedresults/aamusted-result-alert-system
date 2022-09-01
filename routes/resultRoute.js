@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 const _ = require("lodash");
 const sendMail = require("../config/mail");
+const sendSMS = require("../config/sms");
 const Result = require("../models/resultModel");
 const Student = require("../models/studentModel");
 
@@ -39,7 +40,7 @@ router.post(
   "/",
   AsyncHandler(async (req, res) => {
     const newResult = req.body;
-    // console.log(newResult);
+    // //newResult);
 
     let result;
     const isExist = await Result.find({
@@ -48,7 +49,7 @@ router.post(
       semester: Number(newResult.semester),
     });
     if (!_.isEmpty(isExist)) {
-      console.log("is exists");
+      //"is exists");
       const id = isExist[0]._id;
 
       // const newResults = _.unionBy(
@@ -56,7 +57,7 @@ router.post(
       //   newResult.results,
       //   "course.id"
       // );
-      // console.log(newResults);
+      // //newResults);
 
       const newResults = _.merge(
         _.keyBy(isExist[0].results, "course.id"),
@@ -103,6 +104,7 @@ router.put(
   })
 );
 
+//publish individual results
 router.post(
   "/publish",
   AsyncHandler(async (req, res) => {
@@ -113,6 +115,13 @@ router.post(
       const result = await Result.find({ indexNumber });
 
       sendMail(req.body.html, student[0].email);
+
+      const smsMessage = `Dear ${student[0].fullname},
+your end of semester results have been published into your portal and email.
+Thank you!!!`;
+      const data = await sendSMS(smsMessage, student[0].telephoneNo);
+      console.log(data);
+
       res.json("Data sent");
     }
   })
@@ -139,17 +148,25 @@ router.post(
   })
 );
 
+//publish all students results
 router.post(
   "/send",
   AsyncHandler(async (req, res) => {
     const emailInfoList = req.body;
 
-    const response = emailInfoList.map((emailInfo) => {
+    const response = emailInfoList.map(async (emailInfo) => {
+      console.log(emailInfoList);
       sendMail(emailInfo.htmlText, emailInfo.email);
+
+      const smsMessage = `Dear ${emailInfo.fullname},
+      your end of semester results have been published into your portal and email.
+      Thank you!!!`;
+      const data = await sendSMS(smsMessage, emailInfo.telephoneNo);
+      return true;
     });
 
-    Promise.all(response).then(() => {
-      res.json(response);
+    Promise.all(response).then((res) => {
+      res.json(res);
     });
   })
 );
@@ -160,8 +177,8 @@ router.post(
   AsyncHandler(async (req, res) => {
     const indexNumbers = req.body.indexNumber;
 
-    console.log(req.body);
-    console.log(req.files);
+    //req.body);
+    //req.files);
   })
 );
 

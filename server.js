@@ -23,17 +23,13 @@ const app = express();
 //server port
 const port = process.env.PORT || 8000;
 
-//static path
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(path.resolve("images", __dirname)));
 //middlewares
 app.use(cookieParser());
-
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-if (process.env.NODE_ENV !== "productuction") {
+if (process.env.NODE_ENV !== "production") {
   app.use(logger("dev"));
 }
 app.use(
@@ -44,6 +40,10 @@ app.use(
     cookie: { secure: false },
   })
 );
+
+//static path
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 //routes
 app.use("/user", userRoute);
@@ -56,15 +56,15 @@ app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
 app.use("/assigned_course", assignedCourseRoute);
 
-app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+// app.get("/*", function (req, res) {
+//   res.sendFile(path.join(__dirname, "public", "index.html"));
+// });
 
 db.asPromise()
   .then(() => {
     app.listen(port, () => console.log(`listening on port ${port}!`));
   })
   .catch((error) => {
-    console.log(error.reason.servers);
+    //error.reason.servers);
     // throw error;
   });

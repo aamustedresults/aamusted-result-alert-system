@@ -21,7 +21,7 @@ router.get(
   "/:id",
   AsyncHandler(async (req, res) => {
     const id = req.params.id;
-    console.log(id);
+    //id);
 
     if (!mongoose.isValidObjectId(id)) {
       return res.json({
@@ -71,6 +71,7 @@ router.put(
         new: true,
       }
     );
+    //updatedProgramme);
     res.json(updatedProgramme);
   })
 );
@@ -86,7 +87,7 @@ router.delete(
         message: "Invalid programme id",
       });
     }
-    console.log(id);
+    //id);
     const programme = await Programme.findByIdAndRemove(id);
     if (programme === null) {
       return res.json({
