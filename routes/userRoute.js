@@ -150,9 +150,9 @@ router.put(
 
         sendMail(htmlText, user.email);
 
-        const smsMessage = `Dear ${user.username},
-    You have been enrolled successfully on the results system. Your username is ${user.username}  and  your default password is ${reservedPassword}.You can log onto the setting page of the system to change your password.Thank you!!! `;
-        await sendSMS(smsMessage, user.telephoneNo);
+        //     const smsMessage = `Dear ${user.username},
+        // You have been enrolled successfully on the results system. Your username is ${user.username}  and  your default password is ${reservedPassword}.You can log onto the setting page of the system to change your password.Thank you!!! `;
+        //     await sendSMS(smsMessage, user.telephoneNo);
       }
     }
 
