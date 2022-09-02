@@ -107,8 +107,9 @@ router.post(
       });
 
       if (user) {
-        const settingsUrl = "https://aamusted-results.herokuapp.com/info/settings";
-        const htmlText = `<div>
+        if (process.env.NODE_ENV === "production") {
+          const settingsUrl = `${process.env.REACT_APP_BASE_URL}info/settings`;
+          const htmlText = `<div>
         <h2 style='color:#5aa7a7;text-decoration:underline;'>AAMUSTED</h2>
         <p>Dear ${student.fullname}, 
         <p>You have been enrolled successfully on the results system.
@@ -117,16 +118,12 @@ router.post(
         <p>Thank You !!!</p>
         </div>`;
 
-        sendMail(htmlText, student.email);
+          sendMail(htmlText, student.email);
 
-        const smsMessage = `Dear ${student.fullname},
-        You have been enrolled successfully on the results system.
-        Your username is ${student.indexNumber}  and  your default password is ${student.indexNumber}.
-        You can log onto the setting page of the system to change your password.
-        Thank you!!!
-        `;
-        await sendSMS(smsMessage, student.telephoneNo);
-     
+          const smsMessage = `Dear ${student.fullname},
+          You have been enrolled successfully on the results system. Your username is ${student.indexNumber}  and  your default password is ${student.indexNumber}.You can log onto the setting page of the system to change your password.Thank you!!! `;
+          await sendSMS(smsMessage, student.telephoneNo);
+        }
       }
     }
 

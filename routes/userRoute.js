@@ -191,6 +191,46 @@ router.put(
   })
 );
 
+//@PUT Reset Password
+router.patch(
+  "/admin/reset-password",
+  AsyncHandler(async (req, res) => {
+    const { id, password } = req.body;
+    const user = await User.findById(id);
+
+    console.log(user);
+    // if (_.isEmpty(user)) {
+    //   return res.status(404).json("User does not exist");
+    // }
+
+    // const hashedPassword = await bcrypt.hash(password, 10);
+
+    // const updatedUser = await User.findByIdAndUpdate(id, {
+    //   password: hashedPassword,
+    // });
+
+    // if (_.isEmpty(updatedUser)) {
+    //   return res.status(404).json("Error updating user info.Try Again Later.");
+    // }
+
+    res.json("User password updated !!!");
+  })
+);
+
+router.patch(
+  "/",
+  AsyncHandler(async (req, res) => {
+    const updatedUser = await User.findByIdAndUpdate(req.body.id, req.body, {
+      new: true,
+    });
+
+    if (_.isEmpty(updatedUser)) {
+      return res.status(404).json("Error updating user info");
+    }
+
+    res.status(200).json(true);
+  })
+);
 router.put(
   "/account",
   AsyncHandler(async (req, res) => {

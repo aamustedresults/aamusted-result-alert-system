@@ -114,13 +114,14 @@ router.post(
     if (!_.isEmpty(student)) {
       const result = await Result.find({ indexNumber });
 
-      sendMail(req.body.html, student[0].email);
+      if (process.env.NODE_ENV === "production") {
+        sendMail(req.body.html, student[0].email);
 
-      const smsMessage = `Dear ${student[0].fullname},
+        const smsMessage = `Dear ${student[0].fullname},
 your end of semester results have been published into your portal and email.
 Thank you!!!`;
-      const data = await sendSMS(smsMessage, student[0].telephoneNo);
-      console.log(data);
+        await sendSMS(smsMessage, student[0].telephoneNo);
+      }
 
       res.json("Data sent");
     }
@@ -155,13 +156,13 @@ router.post(
     const emailInfoList = req.body;
 
     const response = emailInfoList.map(async (emailInfo) => {
-      console.log(emailInfoList);
-      sendMail(emailInfo.htmlText, emailInfo.email);
-
-      const smsMessage = `Dear ${emailInfo.fullname},
+      if (process.env.NODE_ENV === "production") {
+        sendMail(emailInfo.htmlText, emailInfo.email);
+        const smsMessage = `Dear ${emailInfo.fullname},
       your end of semester results have been published into your portal and email.
       Thank you!!!`;
-      const data = await sendSMS(smsMessage, emailInfo.telephoneNo);
+        await sendSMS(smsMessage, emailInfo.telephoneNo);
+      }
       return true;
     });
 
