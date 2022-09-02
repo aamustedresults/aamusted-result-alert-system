@@ -37,14 +37,14 @@ router.post(
   "/",
   AsyncHandler(async (req, res) => {
     const username = req.body.username;
-    const user = await User.findByUsername(username);
+    const user = await User.findByUsername(username?.trim());
 
     if (_.isEmpty(user[0])) {
-      return res.status(404).json("Usename does not exist!");
+      return res.status(404).json("Invalid Username or Password!");
     }
     const isTrue = bcrypt.compareSync(req.body.password, user[0].password);
     if (!isTrue) {
-      return res.status(404).json("Invalid password!");
+      return res.status(404).json("Invalid Username or Password!");
     }
 
     if (user[0].active === false) {
@@ -119,26 +119,44 @@ router.put(
   AsyncHandler(async (req, res) => {
     const newUser = req.body;
     const reservedPassword = req.body.password;
+    const username = req.body.username;
+
+    const itExists = await User.findByUsername(username?.trim());
+    if (!_.isEmpty(itExists)) {
+      return res
+        .status(404)
+        .json("An account with this Username already exits!");
+    }
 
     const hashedPassword = await bcrypt.hash(newUser.password, 10);
     newUser.password = hashedPassword;
     const user = await User.create(newUser);
+
     if (!user) {
-      return res.status(404).json("Error Saving user info");
+      return res.status(404).json("Error Saving user info!");
     }
 
-    const htmlText = `<div>
-<h2 style='color:#5aa7a7;text-decoration:underline;'>RESULTS SYSTEM</h2>
-<p>Dear ${user.username}, 
-<p>You have been enrolled successfully on the results system.
-Your username is <b style='text-decoration:underline;'> ${user.username}</b>, and  your default password is <b style='text-decoration:underline;'>${reservedPassword}</b>.</p>
-<p> You can log on into the <i style='color:#5aa7a7;text-decoration:underline;'> setting page </i> of the system to change your password.</p>
-<p>Thank You !!!</p>
-</div>`;
+    if (user) {
+      if (process.env.NODE_ENV === "production") {
+        const settingsUrl = `${process.env.REACT_APP_BASE_URL}info/settings`;
+        const htmlText = `<div>
+  <h2 style='color:#5aa7a7;text-decoration:underline;'>AAMUSTED</h2>
+  <p>Dear ${user.username}, 
+  <p>You have been enrolled successfully on the results system.
+  Your username is <b style='text-decoration:underline;'> ${user.username}</b>, and  your default password is <b style='text-decoration:underline;'>${reservedPassword}</b>.</p>
+  <p> You can log onto the <a href=${settingsUrl}> setting page </a> of the system to change your password.</p>
+  <p>Thank You !!!</p>
+  </div>`;
 
-    // sendMail(htmlText);
-    // res.json(user);
-    res.json("hello");
+        sendMail(htmlText, user.email);
+
+        const smsMessage = `Dear ${user.username},
+    You have been enrolled successfully on the results system. Your username is ${user.username}  and  your default password is ${reservedPassword}.You can log onto the setting page of the system to change your password.Thank you!!! `;
+        await sendSMS(smsMessage, user.telephoneNo);
+      }
+    }
+
+    res.sendStatus(201);
   })
 );
 //@PUT add new user
@@ -156,7 +174,7 @@ router.get(
     newUser.password = hashedPassword;
     const user = await User.create(newUser);
     if (!user) {
-      return res.status(404).json("Error Saving user info");
+      return res.status(404).json("Error Saving user info!");
     }
 
     res.json("hello");
@@ -198,20 +216,19 @@ router.patch(
     const { id, password } = req.body;
     const user = await User.findById(id);
 
-    console.log(user);
-    // if (_.isEmpty(user)) {
-    //   return res.status(404).json("User does not exist");
-    // }
+    if (_.isEmpty(user)) {
+      return res.status(404).json("User does not exist");
+    }
 
-    // const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password?.trim(), 10);
 
-    // const updatedUser = await User.findByIdAndUpdate(id, {
-    //   password: hashedPassword,
-    // });
+    const updatedUser = await User.findByIdAndUpdate(id, {
+      password: hashedPassword,
+    });
 
-    // if (_.isEmpty(updatedUser)) {
-    //   return res.status(404).json("Error updating user info.Try Again Later.");
-    // }
+    if (_.isEmpty(updatedUser)) {
+      return res.status(404).json("Error updating user info.Try Again Later.");
+    }
 
     res.json("User password updated !!!");
   })

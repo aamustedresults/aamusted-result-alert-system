@@ -65,6 +65,5 @@ db.asPromise()
     app.listen(port, () => console.log(`listening on port ${port}!`));
   })
   .catch((error) => {
-    //error.reason.servers);
-    // throw error;
+    throw error;
   });
