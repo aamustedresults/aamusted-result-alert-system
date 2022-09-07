@@ -40,7 +40,6 @@ router.post(
   "/",
   AsyncHandler(async (req, res) => {
     const newResult = req.body;
-    // //newResult);
 
     let result;
     const isExist = await Result.find({
@@ -49,16 +48,7 @@ router.post(
       semester: Number(newResult.semester),
     });
     if (!_.isEmpty(isExist)) {
-      //"is exists");
       const id = isExist[0]._id;
-
-      // const newResults = _.unionBy(
-      //   isExist[0].results,
-      //   newResult.results,
-      //   "course.id"
-      // );
-      // //newResults);
-
       const newResults = _.merge(
         _.keyBy(isExist[0].results, "course.id"),
         _.keyBy(newResult.results, "course.id")
@@ -115,7 +105,7 @@ router.post(
       const result = await Result.find({ indexNumber });
 
       if (process.env.NODE_ENV === "production") {
-        sendMail(req.body.html, student[0].email);
+        await sendMail(req.body.html, student[0].email);
 
         const smsMessage = `Dear ${student[0].fullname},
 your end of semester results have been published into your portal and email.
@@ -157,17 +147,17 @@ router.post(
 
     const response = emailInfoList.map(async (emailInfo) => {
       if (process.env.NODE_ENV === "production") {
-        sendMail(emailInfo.htmlText, emailInfo.email);
+        await sendMail(emailInfo.htmlText, emailInfo.email);
         const smsMessage = `Dear ${emailInfo.fullname},
       your end of semester results have been published into your portal and email.
       Thank you!!!`;
         await sendSMS(smsMessage, emailInfo.telephoneNo);
       }
-      return true;
+      return emailInfo.indexNumber;
     });
 
-    Promise.all(response).then((res) => {
-      res.json(res);
+    Promise.all(response).then((data) => {
+      res.json(data?.length);
     });
   })
 );

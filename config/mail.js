@@ -21,8 +21,8 @@ const sendMail = async (htmlText, email) => {
         type: "OAUTH2",
         user: "aamustedresults@gmail.com",
         clientId: process.env.MAIL_CLIENT_ID,
-        clientSecret:process.env.MAIL_CLIENT_SECRET,
-        refreshToken:process.env.MAIL_REFRESH_TOKEN,
+        clientSecret: process.env.MAIL_CLIENT_SECRET,
+        refreshToken: process.env.MAIL_REFRESH_TOKEN,
         accessToken: ACCESS_TOKEN,
       },
       tls: {
@@ -60,9 +60,9 @@ const sendMail = async (htmlText, email) => {
     };
 
     const mailResult = await transportMail.sendMail(mailOptions);
-    //mailResult);
+    // console.log(mailResult);
   } catch (error) {
-    //error.message);
+    throw error.message;
   }
 };
 
