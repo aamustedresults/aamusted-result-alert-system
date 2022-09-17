@@ -6,6 +6,7 @@ const Register = require("../models/registeredCoursesModel");
 const Result = require("../models/resultModel");
 const Student = require("../models/studentModel");
 const LecturerCourse = require("../models/lecturerCourseModel");
+const AssignedCourse = require("../models/assignedCourseModel");
 //@GET registrered courses
 router.get(
   "/",
@@ -25,52 +26,52 @@ router.get(
     const level = req.query.level;
     const nCourse = req.query.course;
     const semester = req.query.semester;
-    const courses = await Register.find({})
+    const students = await Register.find({})
       .where("academicYear")
       .equals(academicYear)
       .where("level")
-      .equals(level);
+      .equals(level)
+      .where("courses.label")
+      .equals(nCourse)
+      .where("courses.professionalID")
+      .equals(professionalID)
+      .select("indexNumber courses")
+      .exec();
 
-    const modifiedCourse = courses.map(async (registeredCourse) => {
-      const results = await Result.find({
-        indexNumber: registeredCourse.indexNumber,
-      })
-        .where("academicYear")
-        .equals(academicYear)
-        .where("level")
-        .equals(level)
-        .where("semester")
-        .equals(semester)
-        .select("results")
-        .exec();
+    const modifiedCourse = students.map(
+      async ({ _id, indexNumber, courses }) => {
+        const results = await Result.find({
+          indexNumber,
+          "results.course.label": nCourse,
+        })
+          .select("results")
+          .exec();
 
-      let filteredResults;
-      if (results) {
-        filteredResults = results.map(({ results }) => {
+        const filteredResults = results.map(({ results }) => {
           const re = results.filter(
             (result) => result.course.label === nCourse
           );
           return re[0];
         });
+
+        const filteredCourses = courses.filter(
+          ({ professionalID, label }) =>
+            professionalID === professionalID && label === nCourse
+        );
+
+        return {
+          _id,
+          indexNumber,
+          academicYear,
+          level,
+          semester,
+          course: filteredCourses[0],
+          result: filteredResults[0] || [],
+        };
       }
-
-      const filteredCourses = registeredCourse.courses.filter(
-        ({ course }) =>
-          course.professionalID === professionalID && course.label === nCourse
-      );
-
-      return {
-        _id: registeredCourse._id,
-        indexNumber: registeredCourse.indexNumber,
-        academicYear: registeredCourse.academicYear,
-        programme: registeredCourse.programme,
-        level: registeredCourse.level,
-        semester: registeredCourse.semester,
-        courses: filteredCourses[0],
-        results: results !== undefined ? filteredResults[0] : [],
-      };
-    });
+    );
     Promise.all(modifiedCourse).then((data) => {
+      console.log(data);
       res.json(data);
     });
   })
@@ -154,6 +155,13 @@ router.post(
 router.post(
   "/all",
   AsyncHandler(async (req, res) => {
+    const to_be_assigned = req.body;
+    const assigned_course = await AssignedCourse.create({
+      professionalID: to_be_assigned.professionalID,
+      programme: to_be_assigned.lecProgramme,
+      course: to_be_assigned.course,
+    });
+
     let course;
     const newCourse = req.body;
 
@@ -173,10 +181,6 @@ router.post(
     });
 
     async function registerMe(newCourse, indexNumber) {
-      // indexNumber: indexNumber,
-      // level: newCourse.level,
-      // semester: Number(newCourse.semester),
-
       const isExist = await Register.find({})
         .where("indexNumber")
         .equals(indexNumber)
@@ -193,8 +197,8 @@ router.post(
         const id = isExist[0]._id;
 
         const newCourses = _.merge(
-          _.keyBy(isExist[0].courses, "course.id"),
-          _.keyBy(newCourse.courses, "course.id")
+          _.keyBy(isExist[0].courses, "id"),
+          _.keyBy(newCourse.courses, "id")
         );
 
         course = await Register.findByIdAndUpdate(
@@ -211,29 +215,31 @@ router.post(
         );
       } else {
         course = await Register.create({ ...newCourse, indexNumber });
-        const lecturerCourses = await LecturerCourse.find({})
-          .where("academicYear")
-          .equals(newCourse.academicYear)
-          .where("level")
-          .equals(newCourse.level)
-          .where("semester")
-          .equals(newCourse.semester)
-          .where("course")
-          .equals(newCourse.courses[0].course.label);
-
-        if (_.isEmpty(lecturerCourses)) {
-          const lec = await LecturerCourse.create({
-            academicYear: newCourse.academicYear,
-            programme: newCourse.programme,
-            level: newCourse.level,
-            semester: newCourse.semester,
-            courseId: newCourse.courses[0].course.id,
-            course: newCourse.courses[0].course.label,
-            professionalID: newCourse.courses[0].course.professionalID,
-          });
-          // //lec);
-        }
       }
+
+      const lecturerCourses = await LecturerCourse.find({})
+
+        .where("academicYear")
+        .equals(newCourse.academicYear)
+        .where("level")
+        .equals(newCourse.level)
+        .where("semester")
+        .equals(Number(newCourse.semester))
+        .where("course")
+        .equals(newCourse.course.label);
+
+      if (_.isEmpty(lecturerCourses)) {
+        const lec = await LecturerCourse.create({
+          academicYear: newCourse.academicYear,
+          programme: newCourse.lecProgramme,
+          level: newCourse.level,
+          semester: newCourse.semester,
+          courseId: newCourse.course.id,
+          course: newCourse.course.label,
+          professionalID: newCourse.professionalID,
+        });
+      }
+
       return course;
     }
 

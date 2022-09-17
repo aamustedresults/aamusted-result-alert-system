@@ -110,7 +110,7 @@ router.post(
         if (process.env.NODE_ENV === "production") {
           const settingsUrl = `${process.env.REACT_APP_BASE_URL}info/settings`;
           const htmlText = `<div>
-        <h2 style='color:#5aa7a7;text-decoration:underline;'>AAMUSTED</h2>
+        <h2 style='color:#8C1438;text-decoration:underline;'>AAMUSTED</h2>
         <p>Dear ${student.fullname}, 
         <p>You have been enrolled successfully on the results system.
         Your username is <b style='text-decoration:underline;'> ${student.indexNumber}</b>, and  your default password is <b style='text-decoration:underline;'>${student.indexNumber}</b>.</p>

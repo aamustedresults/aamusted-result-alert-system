@@ -9,6 +9,7 @@ const sendMail = require("../config/mail");
 const User = require("../models/userModel");
 const Student = require("../models/studentModel");
 const Lecturer = require("../models/lecturerModel");
+const Token = require("../models/tokenModel");
 
 //@PGET all users
 router.get(
@@ -59,11 +60,12 @@ router.post(
     if (user[0].role === "student") {
       const student = await Student.find({ indexNumber: user[0].username });
 
-      if (!student) {
+      if (!student[0]) {
         return res
           .status(404)
           .json("Unable to verify account with this username");
       }
+
       loggedInUser = {
         studentId: student[0]._id,
         username: student[0].fullname,
@@ -81,7 +83,7 @@ router.post(
       if (lecturer.length === 0) {
         return res
           .status(404)
-          .json("Unable to verify account with this username");
+          .json("Unable to verify account with this username!");
       }
 
       loggedInUser = {
@@ -138,21 +140,20 @@ router.put(
 
     if (user) {
       if (process.env.NODE_ENV === "production") {
-        const settingsUrl = `${process.env.REACT_APP_BASE_URL}info/settings`;
+        const settingsUrl = `${process.env.REACT_APP_BASE_URL}/info/settings`;
         const htmlText = `<div>
-  <h2 style='color:#5aa7a7;text-decoration:underline;'>AAMUSTED</h2>
+  <h2 style='color:#8C1438;text-decoration:underline;'>AAMUSTED</h2>
   <p>Dear ${user.username}, 
   <p>You have been enrolled successfully on the results system.
-  Your username is <b style='text-decoration:underline;'> ${user.username}</b>, and  your default password is <b style='text-decoration:underline;'>${reservedPassword}</b>.</p>
-  <p> You can log onto the <a href=${settingsUrl}> setting page </a> of the system to change your password.</p>
+  Your username is <b style='text-decoration:underline;'> ${user.username}</b>, and  your default password is <b style='text-decoration:underline;'>${reservedPassword}</b>.
+ You can log onto the <a href=${settingsUrl}> setting page </a> of the system to change your password.</p>
   <p>Thank You !!!</p>
   </div>`;
 
         sendMail(htmlText, user.email);
-
-        //     const smsMessage = `Dear ${user.username},
-        // You have been enrolled successfully on the results system. Your username is ${user.username}  and  your default password is ${reservedPassword}.You can log onto the setting page of the system to change your password.Thank you!!! `;
-        //     await sendSMS(smsMessage, user.telephoneNo);
+        const smsMessage = `Dear ${user.username},
+        You have been enrolled successfully on the results system. Your username is ${user.username}  and  your default password is ${reservedPassword}.You can log onto the setting page of the system to change your password.Thank you!!! `;
+        await sendSMS(smsMessage, user.telephoneNo);
       }
     }
 
@@ -165,6 +166,7 @@ router.get(
   AsyncHandler(async (req, res) => {
     const newUser = {
       username: "Akwasi",
+      email: "phreshboune17@gmail.com",
       password: "Akwasi21guy",
       role: "administrator",
       active: true,
@@ -208,6 +210,32 @@ router.put(
     res.json("User information updated !!!");
   })
 );
+//@POST Reset User Password
+router.post(
+  "/reset-password",
+  AsyncHandler(async (req, res) => {
+    const { id, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        password: hashedPassword,
+      },
+      {
+        new: true,
+      }
+    );
+
+
+    if (_.isEmpty(updatedUser)) {
+      return res.status(404).json("Error updating user info.Try Again Later.");
+    }
+
+    res.status(200).json("Password updated !!!");
+  })
+);
 
 //@PUT Reset Password
 router.patch(
@@ -248,6 +276,7 @@ router.patch(
     res.status(200).json(true);
   })
 );
+
 router.put(
   "/account",
   AsyncHandler(async (req, res) => {
@@ -270,6 +299,44 @@ router.put(
         ? "User account enabled"
         : "User account disabled"
     );
+  })
+);
+
+//get Token from email
+router.post(
+  "/token",
+  AsyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!_.isEmpty(user)) {
+      const { _id, email } = user;
+
+      const token = await Token.findOneAndUpdate(
+        _id,
+        {
+          email,
+          userId: _id,
+          token: "12345",
+        },
+        {
+          new: true,
+          upsert: true,
+        }
+      );
+
+      if (process.env.NODE_ENV === "production") {
+        const htmlText = `<div>
+      <h2 style='color:#8C1438;text-decoration:underline;'>AAMUSTED</h2>;
+      <p>You reset token is 12345.</p>
+      <p>Thank You !!!</p>
+      </div>`;
+
+        sendMail(htmlText, user.email);
+      }
+
+      return res.status(200).json(token);
+    }
+    res.sendStatus(200);
   })
 );
 

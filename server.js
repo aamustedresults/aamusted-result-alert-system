@@ -8,6 +8,7 @@ const session = require("express-session");
 
 const db = require("./db/DBConnection");
 const studentRoute = require("./routes/studentRoute");
+const facultyRoute = require("./routes/facultyRoute");
 const departmentRoute = require("./routes/departmentRoute");
 const lecturerRoute = require("./routes/lecturerRoute");
 const programmeRoute = require("./routes/programmeRoute");
@@ -42,12 +43,13 @@ app.use(
 );
 
 //static path
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "public")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 //routes
 app.use("/user", userRoute);
 app.use("/department", departmentRoute);
+app.use("/faculty", facultyRoute);
 app.use("/lecturer", lecturerRoute);
 app.use("/student", studentRoute);
 app.use("/programme", programmeRoute);
@@ -56,9 +58,9 @@ app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
 app.use("/assigned_course", assignedCourseRoute);
 
-app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+// app.get("/*", function (req, res) {
+//   res.sendFile(path.join(__dirname, "public", "index.html"));
+// });
 
 db.asPromise()
   .then(() => {

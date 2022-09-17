@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 
 const DeparmentSchema = new mongoose.Schema(
   {
+    faculty: String,
     department: String,
   },
   {
