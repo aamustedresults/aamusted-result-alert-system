@@ -3,6 +3,8 @@ const AsyncHandler = require("express-async-handler");
 const _ = require("lodash");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { v4 } = require("uuid");
+
 const verifyJWT = require("../middlewares/verifyJWT");
 const sendMail = require("../config/mail");
 
@@ -228,7 +230,6 @@ router.post(
       }
     );
 
-
     if (_.isEmpty(updatedUser)) {
       return res.status(404).json("Error updating user info.Try Again Later.");
     }
@@ -309,6 +310,8 @@ router.post(
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!_.isEmpty(user)) {
+      const uuid = v4();
+      const generatedToken = uuid.split("-")[0];
       const { _id, email } = user;
 
       const token = await Token.findOneAndUpdate(
@@ -316,18 +319,19 @@ router.post(
         {
           email,
           userId: _id,
-          token: "12345",
+          token: generatedToken,
         },
         {
           new: true,
           upsert: true,
         }
       );
+      console.log(token);
 
       if (process.env.NODE_ENV === "production") {
         const htmlText = `<div>
       <h2 style='color:#8C1438;text-decoration:underline;'>AAMUSTED</h2>;
-      <p>You reset token is 12345.</p>
+      <p>You reset token is ${generatedToken}.</p>
       <p>Thank You !!!</p>
       </div>`;
 
