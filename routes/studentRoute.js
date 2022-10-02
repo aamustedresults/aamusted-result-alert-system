@@ -95,6 +95,11 @@ router.post(
     const newStudent = req.body;
     newStudent.profile = req.file?.filename;
 
+    const isExists = await Student.findOne({ email: newStudent.email });
+    if (!_.isEmpty(isExists)) {
+      return res.status(404).json("Email address already exists!!!");
+    }
+
     const student = await Student.create(newStudent);
 
     if (student) {
@@ -108,7 +113,7 @@ router.post(
 
       if (user) {
         if (process.env.NODE_ENV === "production") {
-          const settingsUrl = `${process.env.REACT_APP_BASE_URL}info/settings`;
+          const settingsUrl = `${process.env.REACT_APP_BASE_URL}/info/settings`;
           const htmlText = `<div>
         <h2 style='color:#8C1438;text-decoration:underline;'>AAMUSTED</h2>
         <p>Dear ${student.fullname}, 
@@ -121,7 +126,9 @@ router.post(
           sendMail(htmlText, student.email);
 
           const smsMessage = `Dear ${student.fullname},
-          You have been enrolled successfully on the results system. Your username is ${student.indexNumber}  and  your default password is ${student.indexNumber}.You can log onto the setting page of the system to change your password.Thank you!!! `;
+          You have been enrolled successfully on the results system. Your username is ${student.indexNumber}  and  your default password is ${student.indexNumber}.You can log onto the setting page of the system to change your password.Thank you!!! 
+          Link to system: ${process.env.REACT_APP_BASE_URL}
+          `;
           await sendSMS(smsMessage, student.telephoneNo);
         }
       }

@@ -54,6 +54,12 @@ router.post(
     const newLecturer = req.body;
     newLecturer.profile = req.file?.filename;
 
+    const isExists = await Lecturer.findOne({ email: newLecturer.email });
+
+    if (!_.isEmpty(isExists)) {
+      return res.status(404).json("Email address already exists!!!");
+    }
+
     const lecturer = await Lecturer.create(newLecturer);
 
     if (lecturer) {
@@ -67,7 +73,7 @@ router.post(
 
       if (user) {
         if (process.env.NODE_ENV === "production") {
-          const settingsUrl = `${process.env.REACT_APP_BASE_URL}info/settings`;
+          const settingsUrl = `${process.env.REACT_APP_BASE_URL}/info/settings`;
           const htmlText = `<div>
         <h2 style='color:#8C1438;text-decoration:underline;'>AAMUSTED</h2>
         <p>Dear ${lecturer.fullname}, 

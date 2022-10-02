@@ -42,6 +42,8 @@ router.post(
     const username = req.body.username;
     const user = await User.findByUsername(username?.trim());
 
+
+
     if (_.isEmpty(user[0])) {
       return res.status(404).json("Invalid Username or Password!");
     }
@@ -60,7 +62,7 @@ router.post(
 
     let loggedInUser;
     if (user[0].role === "student") {
-      const student = await Student.find({ indexNumber: user[0].username });
+      const student = await Student.find({ username: user[0].username });
 
       if (!student[0]) {
         return res
@@ -70,7 +72,7 @@ router.post(
 
       loggedInUser = {
         studentId: student[0]._id,
-        username: student[0].fullname,
+        username: student[0].indexNumber,
         indexNumber: student[0].indexNumber,
         programme: student[0].programme,
         role: user[0].role,
@@ -167,9 +169,9 @@ router.get(
   "/admin/add",
   AsyncHandler(async (req, res) => {
     const newUser = {
-      username: "Akwasi",
-      email: "phreshboune17@gmail.com",
-      password: "Akwasi21guy",
+      username: "admin",
+      email: "admin@gmail.com",
+      password: "admin12345",
       role: "administrator",
       active: true,
     };
@@ -217,6 +219,8 @@ router.post(
   "/reset-password",
   AsyncHandler(async (req, res) => {
     const { id, password } = req.body;
+
+
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -314,6 +318,7 @@ router.post(
       const generatedToken = uuid.split("-")[0];
       const { _id, email } = user;
 
+
       const token = await Token.findOneAndUpdate(
         _id,
         {
@@ -326,16 +331,16 @@ router.post(
           upsert: true,
         }
       );
-      console.log(token);
+
 
       if (process.env.NODE_ENV === "production") {
-        const htmlText = `<div>
+      const htmlText = `<div>
       <h2 style='color:#8C1438;text-decoration:underline;'>AAMUSTED</h2>;
-      <p>You reset token is ${generatedToken}.</p>
+      <p>You reset token is  <b style='font-size:18px;'>${generatedToken}</b>.</p>
       <p>Thank You !!!</p>
       </div>`;
 
-        sendMail(htmlText, user.email);
+      sendMail(htmlText, user.email);
       }
 
       return res.status(200).json(token);

@@ -12,6 +12,10 @@ const StudentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    username: {
+      type: String,
+      required: true,
+    },
     gender: String,
     dob: String,
     email: {
