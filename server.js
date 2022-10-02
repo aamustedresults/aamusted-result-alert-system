@@ -43,7 +43,7 @@ app.use(
 );
 
 //static path
-// app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 //routes
@@ -58,9 +58,9 @@ app.use("/result", resultRoute);
 app.use("/registered", registeredCoursesRoute);
 app.use("/assigned_course", assignedCourseRoute);
 
-// app.get("/*", function (req, res) {
-//   res.sendFile(path.join(__dirname, "public", "index.html"));
-// });
+app.get("/*", function (req, res) {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 db.asPromise()
   .then(() => {
